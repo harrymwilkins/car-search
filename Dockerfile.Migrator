@@ -1,5 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
+RUN dotnet tool install dotnet-ef --global
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 WORKDIR /tmp/source
 
 # Restore projects
@@ -11,15 +14,3 @@ RUN dotnet restore
 # Copy source
 COPY ./CarSearch.Worker/ ./CarSearch.Worker
 COPY ./CarSearch.Domain/ ./CarSearch.Domain
-
-WORKDIR /tmp/source/CarSearch.Worker
-
-# Build source
-RUN dotnet publish -c release -o /car-search-worker --no-restore
-
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
-
-WORKDIR /car-search-worker
-COPY --from=build /car-search-worker ./
-
-ENTRYPOINT ["dotnet", "CarSearch.Worker.dll"]

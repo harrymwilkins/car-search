@@ -1,9 +1,10 @@
 using CarSearch.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace CarSearch.Worker.Data;
 
-class DataContext: DbContext
+public class DataContext: DbContext
 {
     public DataContext(DbContextOptions options): base(options) {}
 
@@ -16,7 +17,7 @@ class DataContext: DbContext
             throw new Exception("Cannot configure data context - CONNECTION_STRING not set");
         }
 
-        options.UseNpgsql($"Data Source={connectionString}");
+        options.UseNpgsql(connectionString);
     }
 
     public required DbSet<Listing> Listings { get; set; }

@@ -1,5 +1,5 @@
 services:
-  background-service:
+  worker:
     container_name: worker
     build:
       context: .
@@ -8,9 +8,12 @@ services:
     ports:
       - "5001:5003"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - CONNECTION_STRING=${CONNECTION_STRING}
+      ASPNETCORE_ENVIRONMENT: Development
+      CONNECTION_STRING: ${CONNECTION_STRING}
     entrypoint: ["sh", "-c", "dotnet CarSearch.Worker.dll"]
+    depends_on:
+      database:
+        condition: service_healthy
   database:
     container_name: database
     image: postgres
@@ -27,3 +30,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  migrator:
+    container_name: migrator
+    build:
+      context: .
+      dockerfile: Dockerfile.Migrator
+    restart: no
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      CONNECTION_STRING: ${CONNECTION_STRING}
+    entrypoint: ["dotnet", "ef", "--project", "CarSearch.Worker", "database", "update"]
+    depends_on:
+      database:
+        condition: service_healthy
