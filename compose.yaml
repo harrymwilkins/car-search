@@ -1,0 +1,29 @@
+services:
+  background-service:
+    container_name: worker
+    build:
+      context: .
+      dockerfile: Dockerfile.CarSearch.Worker
+    restart: always
+    ports:
+      - "5001:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CONNECTION_STRING=${CONNECTION_STRING}
+    entrypoint: ["sh", "-c", "dotnet CarSearch.Worker.dll"]
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+      POSTGRES_DB: carsearch
+    ports:
+      - "5332:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5

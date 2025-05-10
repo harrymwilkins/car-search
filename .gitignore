@@ -1,0 +1,4 @@
+.env
+CarSearch.*/.vs
+CarSearch.*/**/obj
+CarSearch.*/**/bin

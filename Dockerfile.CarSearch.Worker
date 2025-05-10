@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /tmp/source
+
+# Restore projects
+COPY ./CarSearch.sln ./CarSearch.sln
+COPY ./CarSearch.Worker/CarSearch.Worker.csproj ./CarSearch.Worker/
+COPY ./CarSearch.Domain/CarSearch.Domain.csproj ./CarSearch.Domain/
+RUN dotnet restore
+
+# Build source
+COPY ./CarSearch.Worker/ ./CarSearch.Worker
+COPY ./CarSearch.Domain/ ./CarSearch.Domain
+
+WORKDIR /tmp/source/CarSearch.Worker
+RUN dotnet publish -c release -o /car-search-worker --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+
+WORKDIR /car-search-worker
+COPY --from=build /car-search-worker ./
+
+ENTRYPOINT ["dotnet", "CarSearch.Worker.dll"]

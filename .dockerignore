@@ -1,0 +1,4 @@
+CarSearch.*/**/bin
+CarSearch.*/**/obj
+.env
+.gitignore
